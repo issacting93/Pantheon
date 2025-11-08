@@ -32,10 +32,10 @@ export const ParticleSystem = forwardRef<THREE.Points, ParticleSystemProps>(
     return (
       <points ref={ref} geometry={particleGeometry}>
         <pointsMaterial
-          color={0x6324F8} // Purple accent color
-          size={0.2}
+          color={0xA18F7C}
+          size={0.22}
           transparent={true}
-          opacity={0.8}
+          opacity={0.85}
         />
       </points>
     );

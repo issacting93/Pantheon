@@ -1,137 +1,65 @@
-# Three.js Audio Visualizer - React
+# Pantheon – Modular AI Constellation
 
-A stunning audio-reactive 3D visualization built with React and Three.js. Features particle systems, dynamic camera controls, and real-time audio analysis.
+Pantheon visualises a modular, AI-driven collective rendered with React and Three.js. The central sphere embodies core personalities, concentric rings archive memories, and a halo of particles captures events and emergent signals. Everything runs procedurally—no audio input required.
 
 ## Features
 
-- 🎵 **Audio-Reactive Visualization**: Real-time audio analysis with bass, mid, and treble frequency detection
-- 🎨 **Post-Processing Effects**: Chromatic aberration and distortion shaders
-- 🎥 **Dynamic Camera Controls**: Multiple camera states for different viewing experiences
-- 🎧 **Multiple Audio Sources**: Support for audio files and microphone input
-- 🔮 **3D Model Loading**: FBX and STL model support with texture mapping
-- ⚡ **Performance Optimized**: Frame-rate limiting and efficient particle systems
+- 🌀 **Core Personalities** – Pulsing inner sphere with layered Fresnel shading
+- 🧠 **Memory Rings** – Orbiting dot arrays that breathe and rotate in evolving patterns
+- ✨ **Signal Particles** – Configurable particle field with optional connection lattice
+- 🔷 **Parametric Ring** – Deployable linkage inspired by angulated scissor elements with adjustable geometry
+- 🛰️ **Observer Controls** – Switch between orbital camera presets and tune node density, scale, and link distance
+- 🎛️ **Behavioral Dynamics** – Fine-grained control over pulsing, drift, memory flux, and observer drift
+- 🌌 **Post Processing** – Optional screen-space effects for cinematic presentation
 
-## Key Components
+## Conceptual Model
 
-### SceneManager
-The core Three.js scene manager that handles:
-- Particle sphere creation and animation
-- Dynamic line connections between particles
-- Post-processing effects
-- Audio-reactive visual effects
-- Camera controls
-
-### AudioVisualizer
-Handles audio input and frequency analysis:
-- Media element audio source
-- Microphone input
-- FFT analysis for bass/mid/high frequencies
-
-### ModelLoader
-Loads and manages 3D models:
-- FBX model loading
-- STL model loading
-- Texture mapping
-- Material configuration
+| Layer | Represents | Visual Treatment |
+| ----- | ---------- | ---------------- |
+| Core Sphere | Primary AI personalities | Layered scale modulation + Fresnel glow |
+| Memory Rings | Long-term knowledge bases | Rotational drift, breathing scale variations |
+| Parametric Ring | Structured reasoning scaffolds | Double-chain linkage with adjustable angles |
+| Particle Field | Events, signals, transient fragments | Oscillating particles w/ optional per-node motion |
+| Event Lattice | Cross-memory relationships | Dynamic line segments with animated opacity |
 
 ## Getting Started
 
-### Installation
-
 ```bash
 npm install
-```
-
-### Development
-
-```bash
 npm run dev
 ```
 
-The app will be available at `http://localhost:3000`
+Visit `http://localhost:3000` to explore Pantheon in development. Build a production bundle with `npm run build`.
 
-### Build
+## Tuning the Experience
 
-```bash
-npm run build
-```
+Use the Pantheon Console (top-right panel) to:
 
-## Usage
+- Select orbit presets for the observer camera
+- Adjust node counts, radii, and link distance for the constellation
+- Toggle key layers (core, memory rings, particles, parametric linkage, event lattice)
+- Dial in behavioral dynamics such as Core Pulse, Orbit Drift, Memory Flux, Observer Drift, the Event Lattice opacity, and the parametric ring geometry
 
-### Audio Sources
+## Tech Stack
 
-1. **Load Audio File**: Click the "Load Audio File" button to select an audio file from your computer
-2. **Use Microphone**: Click the "Use Microphone" button to visualize audio from your microphone
-3. **Stop Audio**: Click the "Stop Audio" button to stop playback and disconnect audio
+- **React 18**
+- **Three.js** with **@react-three/fiber** and **@react-three/drei**
+- **TypeScript** for static typing
+- **Vite** for rapid development and builds
 
-### Camera Controls
-
-The visualizer includes three camera states:
-- **Default (200u)**: Distant view showing the full particle system
-- **State 1 (80u)**: Medium distance for detailed particle viewing
-- **State 2 (50u)**: Close-up view for immersive experience
-
-### Audio-Reactive Effects
-
-The visualizer responds to different frequency ranges:
-- **Bass**: Affects particle scale and movement intensity
-- **Mid**: Controls central sphere pulsing
-- **High**: Creates camera shake effects for dynamic viewing
-
-## Project Structure
+## Folder Highlights
 
 ```
-threejs-audio-visualizer-react/
-├── src/
-│   ├── components/
-│   │   ├── audio-visualization/
-│   │   │   ├── AudioVisualizer.ts       # Audio analysis
-│   │   │   └── AudioReactiveEffects.ts  # Visual effects
-│   │   ├── AudioVisualizerDemo.tsx      # Main demo component
-│   │   └── AudioVisualizerDemo.css      # Component styles
-│   ├── lib/
-│   │   └── three/
-│   │       ├── SceneManager.ts          # Three.js scene management
-│   │       └── ModelLoader.ts           # 3D model loading
-│   ├── shaders/
-│   │   ├── fresnel.js                   # Fresnel shader
-│   │   ├── ChromaticAberrationShader.js # Chromatic aberration
-│   │   └── DistortedPixelsShader.js     # Pixel distortion
-│   ├── App.tsx                          # Main app component
-│   ├── App.css                          # App styles
-│   ├── main.tsx                         # React entry point
-│   └── index.css                        # Global styles
-├── index.html                           # HTML template
-├── package.json                         # Dependencies
-├── tsconfig.json                        # TypeScript config
-├── vite.config.ts                       # Vite config
-└── README.md                            # This file
+src/
+├── components/
+│   ├── PantheonDemo.tsx            # Pantheon entry component & state
+│   ├── ControlPanel.tsx            # Pantheon Console UI
+│   ├── PantheonDemo.css            # Pantheon scene styling
+│   ├── r3f/                        # Three.js scene primitives (central sphere, parametric ring, etc.)
+│   └── effects/                    # Procedural effect controllers
+└── shaders/                        # Custom shader modules
 ```
-
-## Technologies Used
-
-- **React 18**: UI framework
-- **Three.js**: 3D graphics library
-- **TypeScript**: Type-safe development
-- **Vite**: Build tool and dev server
-- **Web Audio API**: Audio analysis and processing
-
-## Browser Compatibility
-
-- Modern browsers with WebGL support
-- Audio visualization requires Web Audio API support
-- Microphone input requires getUserMedia API support
-
-## Performance Tips
-
-- The visualizer is optimized for 60 FPS
-- Particle count can be adjusted for performance (default: 170)
-- Post-processing effects can be toggled for better performance
 
 ## License
 
 MIT
-
-## Credits
-
-Adapted from the original SvelteKit portfolio project.

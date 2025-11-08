@@ -4,13 +4,6 @@ import * as THREE from 'three';
 
 interface ParticleConnectionsEffectProps {
   particleSystemRef: React.RefObject<THREE.Points>;
-  audioData: {
-    bassLevel: number;
-    midLevel: number;
-    trebleLevel: number;
-    volume: number;
-    beatDetected: boolean;
-  };
   enabled?: boolean;
   maxDistance?: number;
   maxConnections?: number;
@@ -19,7 +12,6 @@ interface ParticleConnectionsEffectProps {
 
 export default function ParticleConnectionsEffect({
   particleSystemRef,
-  audioData,
   enabled = true,
   maxDistance = 2.5,
   maxConnections = 100,
@@ -27,8 +19,11 @@ export default function ParticleConnectionsEffect({
 }: ParticleConnectionsEffectProps) {
   const lineSegmentsRef = useRef<THREE.LineSegments>(null);
   const linesGeometry = useRef<THREE.BufferGeometry>(new THREE.BufferGeometry());
-  
-  // Create line material
+  const offsets = useRef({
+    distance: Math.random() * Math.PI * 2,
+    connection: Math.random() * Math.PI * 2
+  });
+
   const lineMaterial = useMemo(() => {
     return new THREE.LineBasicMaterial({
       color: 0x00ffff,
@@ -38,14 +33,13 @@ export default function ParticleConnectionsEffect({
     });
   }, [opacity]);
 
-  // Initialize empty geometry
   useEffect(() => {
-    const positions = new Float32Array(maxConnections * 6); // 2 points per line, 3 coords per point
+    const positions = new Float32Array(maxConnections * 6);
     linesGeometry.current.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    linesGeometry.current.setDrawRange(0, 0); // Start with no lines drawn
+    linesGeometry.current.setDrawRange(0, 0);
   }, [maxConnections]);
 
-  useFrame(() => {
+  useFrame(({ clock }) => {
     if (!enabled || !particleSystemRef.current || !linesGeometry.current) return;
 
     const particleGeometry = particleSystemRef.current.geometry;
@@ -53,60 +47,51 @@ export default function ParticleConnectionsEffect({
 
     const particlePositions = particleGeometry.attributes.position.array as Float32Array;
     const linePositions = linesGeometry.current.attributes.position.array as Float32Array;
-    
+
     let lineIndex = 0;
     const particleCount = particlePositions.length / 3;
-    
-    // Audio-reactive distance and connection count
-    const audioDistance = maxDistance * (1 + audioData.volume * 0.5);
-    const audioConnections = Math.floor(maxConnections * (0.5 + audioData.midLevel * 0.5));
-    
-    // Find connections between nearby particles
-    for (let i = 0; i < particleCount && lineIndex < audioConnections * 2; i++) {
+    const elapsed = clock.getElapsedTime();
+
+    const distanceMod = 1 + Math.sin(elapsed * 0.4 + offsets.current.distance) * 0.25;
+    const connectionMod = 0.6 + (Math.sin(elapsed * 0.6 + offsets.current.connection) + 1) * 0.2;
+    const dynamicDistance = maxDistance * distanceMod;
+    const dynamicConnections = Math.floor(maxConnections * connectionMod);
+
+    for (let i = 0; i < particleCount && lineIndex < dynamicConnections * 2; i++) {
       const x1 = particlePositions[i * 3];
       const y1 = particlePositions[i * 3 + 1];
       const z1 = particlePositions[i * 3 + 2];
-      
-      for (let j = i + 1; j < particleCount && lineIndex < audioConnections * 2; j++) {
+
+      for (let j = i + 1; j < particleCount && lineIndex < dynamicConnections * 2; j++) {
         const x2 = particlePositions[j * 3];
         const y2 = particlePositions[j * 3 + 1];
         const z2 = particlePositions[j * 3 + 2];
-        
-        // Calculate distance
+
         const dx = x2 - x1;
         const dy = y2 - y1;
         const dz = z2 - z1;
         const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
-        
-        // Create connection if within range
-        if (distance < audioDistance) {
-          // First point
+
+        if (distance < dynamicDistance) {
           linePositions[lineIndex * 3] = x1;
           linePositions[lineIndex * 3 + 1] = y1;
           linePositions[lineIndex * 3 + 2] = z1;
-          
-          // Second point
+
           linePositions[(lineIndex + 1) * 3] = x2;
           linePositions[(lineIndex + 1) * 3 + 1] = y2;
           linePositions[(lineIndex + 1) * 3 + 2] = z2;
-          
+
           lineIndex += 2;
         }
       }
     }
-    
-    // Update geometry
+
     linesGeometry.current.setDrawRange(0, lineIndex);
     linesGeometry.current.attributes.position.needsUpdate = true;
-    
-    // Update material opacity based on audio
+
     if (lineMaterial) {
-      lineMaterial.opacity = opacity * (0.3 + audioData.volume * 0.7);
-      
-      // Beat detection makes lines brighter
-      if (audioData.beatDetected) {
-        lineMaterial.opacity = Math.min(1, lineMaterial.opacity * 1.5);
-      }
+      const opacityPulse = 0.3 + (Math.sin(elapsed * 0.8) + 1) * 0.35;
+      lineMaterial.opacity = Math.min(1, opacity * opacityPulse);
     }
   });
 

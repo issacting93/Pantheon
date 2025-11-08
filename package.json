@@ -1,9 +1,9 @@
 {
-  "name": "threejs-audio-visualizer-react",
+  "name": "pantheon-visualizer",
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "A React-based Three.js audio visualizer with reactive effects",
+  "description": "Pantheon – a modular AI constellation rendered with React and Three.js",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

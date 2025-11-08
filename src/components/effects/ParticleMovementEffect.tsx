@@ -4,13 +4,6 @@ import * as THREE from 'three';
 
 interface ParticleMovementEffectProps {
   particleSystemRef: React.RefObject<THREE.Points>;
-  audioData: {
-    bassLevel: number;
-    midLevel: number;
-    trebleLevel: number;
-    volume: number;
-    beatDetected: boolean;
-  };
   enabled?: boolean;
   intensity?: number;
   frequency?: number;
@@ -18,15 +11,14 @@ interface ParticleMovementEffectProps {
 
 export default function ParticleMovementEffect({
   particleSystemRef,
-  audioData,
   enabled = true,
   intensity = 0.1,
   frequency = 1.0
 }: ParticleMovementEffectProps) {
   const originalPositions = useRef<Float32Array | null>(null);
   const isInitialized = useRef(false);
+  const noiseSeed = useRef(Math.random() * 1000);
 
-  // Store original positions when component mounts
   useEffect(() => {
     if (!particleSystemRef.current || isInitialized.current) return;
 
@@ -46,34 +38,26 @@ export default function ParticleMovementEffect({
 
     const positions = geometry.attributes.position.array as Float32Array;
     const time = state.clock.elapsedTime * frequency;
-    
-    // Apply movement based on audio
+    const modulation = (Math.sin(time * 0.3 + noiseSeed.current) + 1) * 0.5 + 0.5;
+
     for (let i = 0; i < positions.length; i += 3) {
       const originalX = originalPositions.current[i];
       const originalY = originalPositions.current[i + 1];
       const originalZ = originalPositions.current[i + 2];
-      
-      // Create movement offsets based on audio and time
-      const bassOffset = audioData.bassLevel * intensity;
-      const midOffset = audioData.midLevel * intensity * 0.5;
-      const trebleOffset = audioData.trebleLevel * intensity * 0.3;
-      
-      // Apply sine/cosine wave movement
-      positions[i] = originalX + Math.sin(time + i * 0.01) * bassOffset;
-      positions[i + 1] = originalY + Math.cos(time + i * 0.01) * midOffset;
-      positions[i + 2] = originalZ + Math.sin(time + i * 0.005) * trebleOffset;
-      
-      // Beat detection adds extra movement
-      if (audioData.beatDetected) {
-        positions[i] += Math.sin(time * 5 + i) * 0.05;
-        positions[i + 1] += Math.cos(time * 5 + i) * 0.05;
-      }
+
+      const offset = i * 0.01 + noiseSeed.current;
+      const waveX = Math.sin(time + offset) * intensity * modulation;
+      const waveY = Math.cos(time * 1.2 + offset * 0.8) * intensity * 0.6 * modulation;
+      const waveZ = Math.sin(time * 0.7 + offset * 1.5) * intensity * 0.4 * modulation;
+
+      positions[i] = originalX + waveX;
+      positions[i + 1] = originalY + waveY;
+      positions[i + 2] = originalZ + waveZ;
     }
-    
+
     geometry.attributes.position.needsUpdate = true;
   });
 
-  // Reset positions when disabled
   useEffect(() => {
     if (!enabled && particleSystemRef.current && originalPositions.current) {
       const geometry = particleSystemRef.current.geometry;

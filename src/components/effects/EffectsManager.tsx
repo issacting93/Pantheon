@@ -50,7 +50,7 @@ export const defaultEffectSettings: EffectSettings = {
     xAxisIntensity: 0.003
   },
   particleMovement: {
-    enabled: false, // Disabled by default as it can be performance intensive
+    enabled: false,
     intensity: 0.1,
     frequency: 1.0
   },
@@ -61,7 +61,7 @@ export const defaultEffectSettings: EffectSettings = {
     smoothing: 0.1
   },
   particleConnections: {
-    enabled: false, // Disabled by default as it can be performance intensive
+    enabled: false,
     maxDistance: 2.5,
     maxConnections: 100,
     opacity: 0.3
@@ -70,22 +70,13 @@ export const defaultEffectSettings: EffectSettings = {
 
 interface EffectsManagerProps {
   particleSystemRef: React.RefObject<THREE.Points>;
-  audioData: {
-    bassLevel: number;
-    midLevel: number;
-    trebleLevel: number;
-    volume: number;
-    beatDetected: boolean;
-  };
   settings?: Partial<EffectSettings>;
 }
 
 export default function EffectsManager({
   particleSystemRef,
-  audioData,
   settings = {}
 }: EffectsManagerProps) {
-  // Merge provided settings with defaults
   const effectSettings: EffectSettings = {
     particleScale: { ...defaultEffectSettings.particleScale, ...settings.particleScale },
     particleRotation: { ...defaultEffectSettings.particleRotation, ...settings.particleRotation },
@@ -98,40 +89,35 @@ export default function EffectsManager({
     <>
       <ParticleScaleEffect
         particleSystemRef={particleSystemRef}
-        audioData={audioData}
         enabled={effectSettings.particleScale.enabled}
         intensity={effectSettings.particleScale.intensity}
         smoothing={effectSettings.particleScale.smoothing}
       />
-      
+
       <ParticleRotationEffect
         particleSystemRef={particleSystemRef}
-        audioData={audioData}
         enabled={effectSettings.particleRotation.enabled}
         yAxisIntensity={effectSettings.particleRotation.yAxisIntensity}
         zAxisIntensity={effectSettings.particleRotation.zAxisIntensity}
         xAxisIntensity={effectSettings.particleRotation.xAxisIntensity}
       />
-      
+
       <ParticleMovementEffect
         particleSystemRef={particleSystemRef}
-        audioData={audioData}
         enabled={effectSettings.particleMovement.enabled}
         intensity={effectSettings.particleMovement.intensity}
         frequency={effectSettings.particleMovement.frequency}
       />
-      
+
       <CameraShakeEffect
-        audioData={audioData}
         enabled={effectSettings.cameraShake.enabled}
         intensity={effectSettings.cameraShake.intensity}
         threshold={effectSettings.cameraShake.threshold}
         smoothing={effectSettings.cameraShake.smoothing}
       />
-      
+
       <ParticleConnectionsEffect
         particleSystemRef={particleSystemRef}
-        audioData={audioData}
         enabled={effectSettings.particleConnections.enabled}
         maxDistance={effectSettings.particleConnections.maxDistance}
         maxConnections={effectSettings.particleConnections.maxConnections}

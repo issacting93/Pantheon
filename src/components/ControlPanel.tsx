@@ -1,95 +1,83 @@
-import { useState } from 'react';
+import { useState, Dispatch, SetStateAction } from 'react';
 import { ChevronDown, ChevronRight, RotateCcw, Settings } from 'lucide-react';
 import type { SceneSettings, SceneElementsVisibility } from './r3f/Scene3D';
 import type { EffectSettings } from './effects/EffectsManager';
-import { defaultEffectSettings } from './effects/EffectsManager';
-import { AudioSourceSelector } from './AudioSourceSelector';
-import { StatusIndicator } from './StatusIndicator';
-import type { AudioSourceState, BrowserCapabilities } from '../types/audio';
+import type { ParametricRingSettings } from './r3f/ParametricRing';
 import './ControlPanel.css';
+import type {
+  CharacterLayerTokens,
+  CognitiveLayerTokens,
+  ExpressionLayerTokens,
+  TraitLayerTokens
+} from '../types/personality';
 
 interface ControlPanelProps {
-  // Enhanced audio controls
-  sourceState: AudioSourceState;
-  capabilities: BrowserCapabilities;
-  onSelectMicrophone: () => void;
-  onSelectFile: (file: File) => void;
-  onSelectBrowserTab: () => void;
-  onSelectSystemAudio: () => void;
-  onDisconnect: () => void;
-
-  // Legacy audio controls (for backward compatibility)
-  onLoadAudio?: (file: File) => void;
-  onUseMic?: () => void;
-  onStopAudio?: () => void;
-
-  // Audio levels
-  audioLevels: {
-    bass: number;
-    mid: number;
-    treble: number;
-    beatDetected: boolean;
-  };
-
-  // Scene settings
-  sceneSettings: SceneSettings;
-  onSceneSettingsChange: (settings: SceneSettings) => void;
-
-  // Scene visibility
+  currentSettings: SceneSettings;
+  setCurrentSettings: (settings: SceneSettings) => void;
   sceneVisibility: SceneElementsVisibility;
-  onSceneVisibilityChange: (visibility: SceneElementsVisibility) => void;
-
-  // Effect settings
+  setSceneVisibility: (visibility: SceneElementsVisibility) => void;
   effectSettings: EffectSettings;
-  onEffectSettingsChange: (settings: EffectSettings) => void;
-
-  // Camera presets
+  setEffectSettings: (settings: EffectSettings) => void;
   cameraState: number;
-  onCameraStateChange: (state: number) => void;
+  setCameraState: (state: number) => void;
+  resetToDefaults: () => void;
+  parametricRingSettings: ParametricRingSettings;
+  setParametricRingSettings: (settings: ParametricRingSettings) => void;
+  characterLayerTokens: CharacterLayerTokens;
+  setCharacterLayerTokens: Dispatch<SetStateAction<CharacterLayerTokens>>;
+  cognitiveLayerTokens: CognitiveLayerTokens;
+  setCognitiveLayerTokens: Dispatch<SetStateAction<CognitiveLayerTokens>>;
+  expressionLayerTokens: ExpressionLayerTokens;
+  setExpressionLayerTokens: Dispatch<SetStateAction<ExpressionLayerTokens>>;
+  traitLayerTokens: TraitLayerTokens;
+  setTraitLayerTokens: Dispatch<SetStateAction<TraitLayerTokens>>;
 }
 
 export function ControlPanel({
-  sourceState,
-  capabilities,
-  onSelectMicrophone,
-  onSelectFile,
-  onSelectBrowserTab,
-  onSelectSystemAudio,
-  onDisconnect,
-  audioLevels,
-  sceneSettings,
-  onSceneSettingsChange,
+  currentSettings,
+  setCurrentSettings,
   sceneVisibility,
-  onSceneVisibilityChange,
+  setSceneVisibility,
   effectSettings,
-  onEffectSettingsChange,
+  setEffectSettings,
   cameraState,
-  onCameraStateChange
+  setCameraState,
+  resetToDefaults,
+  parametricRingSettings,
+  setParametricRingSettings,
+  characterLayerTokens,
+  setCharacterLayerTokens,
+  cognitiveLayerTokens,
+  setCognitiveLayerTokens,
+  expressionLayerTokens,
+  setExpressionLayerTokens,
+  traitLayerTokens,
+  setTraitLayerTokens
 }: ControlPanelProps) {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
-    audio: true,
-    scene: true,
-    effects: true,
-    advanced: false
+    observer: true,
+    layer6: true,
+    layer5: true,
+    layer4: true,
+    layer2: false
   });
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
-  const resetAll = () => {
-    onEffectSettingsChange(defaultEffectSettings);
-    onSceneVisibilityChange({
-      centralSphere: true,
-      ringOfDots: true,
-      particles: true,
-      connectionLines: true
+  function updateParametricSetting<K extends keyof ParametricRingSettings>(
+    key: K,
+    value: ParametricRingSettings[K]
+  ) {
+    setParametricRingSettings({
+      ...parametricRingSettings,
+      [key]: value
     });
-    onCameraStateChange(0);
-  };
+  }
 
   const updateEffectSetting = (category: keyof EffectSettings, key: string, value: any) => {
-    onEffectSettingsChange({
+    setEffectSettings({
       ...effectSettings,
       [category]: {
         ...effectSettings[category],
@@ -102,144 +90,158 @@ export function ControlPanel({
     <div className="control-panel">
       <div className="panel-header">
         <Settings className="panel-icon" />
-        <h2>Controls</h2>
-        <button onClick={resetAll} className="reset-btn" title="Reset All">
+        <h2>Pantheon Console</h2>
+        <button onClick={resetToDefaults} className="reset-btn" title="Reset All">
           <RotateCcw size={16} />
         </button>
       </div>
 
-      {/* Enhanced Audio Sources */}
       <Section
-        title="Audio Source"
-        expanded={expandedSections.audio}
-        onToggle={() => toggleSection('audio')}
+        title="Memory / Personality Profiles"
+        expanded={expandedSections.observer}
+        onToggle={() => toggleSection('observer')}
       >
-        {/* Multi-Source Audio Selector */}
-        <AudioSourceSelector
-          currentSource={sourceState.type}
-          status={sourceState.status}
-          capabilities={capabilities}
-          onSelectMicrophone={onSelectMicrophone}
-          onSelectFile={onSelectFile}
-          onSelectBrowserTab={onSelectBrowserTab}
-          onSelectSystemAudio={onSelectSystemAudio}
-          onDisconnect={onDisconnect}
-        />
-
-        {/* Status Indicator */}
-        <StatusIndicator
-          sourceType={sourceState.type}
-          status={sourceState.status}
-          error={sourceState.error}
-          volume={sourceState.volume}
-        />
-
-        {/* Audio Levels */}
-        <div className="audio-levels">
-          <LevelMeter label="Bass" level={audioLevels.bass} color="#DA4167" />
-          <LevelMeter label="Mid" level={audioLevels.mid} color="#6324F8" />
-          <LevelMeter label="Treble" level={audioLevels.treble} color="#00D9FF" />
-          {audioLevels.beatDetected && (
-            <div className="beat-indicator">🎵 BEAT</div>
-          )}
-        </div>
-      </Section>
-
-      {/* Scene Configuration */}
-      <Section
-        title="Scene Configuration"
-        expanded={expandedSections.scene}
-        onToggle={() => toggleSection('scene')}
-      >
-        {/* Camera Presets */}
         <div className="control-subsection">
-          <label className="control-label">Camera Distance</label>
+          <label className="control-label">Relational Depth</label>
           <div className="button-row">
             <button
               className={`preset-btn ${cameraState === 0 ? 'active' : ''}`}
-              onClick={() => onCameraStateChange(0)}
+              onClick={() => setCameraState(0)}
             >
-              Far (200u)
+              Acquaintance
             </button>
             <button
               className={`preset-btn ${cameraState === 1 ? 'active' : ''}`}
-              onClick={() => onCameraStateChange(1)}
+              onClick={() => setCameraState(1)}
             >
-              Mid (80u)
+              Familiar
             </button>
             <button
               className={`preset-btn ${cameraState === 2 ? 'active' : ''}`}
-              onClick={() => onCameraStateChange(2)}
+              onClick={() => setCameraState(2)}
             >
-              Close (50u)
+              Intimate
             </button>
           </div>
         </div>
+      </Section>
 
-        {/* Scene Parameters */}
+      <Section
+        title="Layer 6 · Expression & Social Identity"
+        expanded={expandedSections.layer6}
+        onToggle={() => toggleSection('layer6')}
+      >
         <div className="control-subsection">
-          <Slider
-            label="Particle Count"
-            value={sceneSettings.particleCount}
-            min={10}
-            max={500}
-            step={10}
-            onChange={(value) => onSceneSettingsChange({ ...sceneSettings, particleCount: value })}
+          <TokenListEditor
+            label="Language Markers"
+            tokens={expressionLayerTokens.languageMarkers}
+            onChange={(tokens) => setExpressionLayerTokens(prev => ({ ...prev, languageMarkers: tokens }))}
+            placeholder="technical_precision, minimal_jargon, ..."
           />
-          <Slider
-            label="Particle Radius"
-            value={sceneSettings.particleRadius}
-            min={3}
-            max={15}
-            step={0.5}
-            onChange={(value) => onSceneSettingsChange({ ...sceneSettings, particleRadius: value })}
+          <TokenListEditor
+            label="Expertise Domains"
+            tokens={expressionLayerTokens.expertiseDomains}
+            onChange={(tokens) => setExpressionLayerTokens(prev => ({ ...prev, expertiseDomains: tokens }))}
+            placeholder="distributed_systems, philosophy, ..."
           />
-          <Slider
-            label="Connection Distance"
-            value={sceneSettings.maxLineDistance}
-            min={0.5}
-            max={8}
-            step={0.5}
-            onChange={(value) => onSceneSettingsChange({ ...sceneSettings, maxLineDistance: value })}
+          <TokenListEditor
+            label="Interaction Style"
+            tokens={expressionLayerTokens.interactionStyle}
+            onChange={(tokens) => setExpressionLayerTokens(prev => ({ ...prev, interactionStyle: tokens }))}
+            placeholder="thorough_explanations, numbered_lists, ..."
+          />
+          <TextField
+            label="Rhythm Signature"
+            value={expressionLayerTokens.rhythmSignature}
+            onChange={(value) => setExpressionLayerTokens(prev => ({ ...prev, rhythmSignature: value }))}
+            placeholder="measured_cadence"
           />
         </div>
 
-        {/* Scene Elements Visibility */}
         <div className="control-subsection">
-          <label className="control-label">Visible Elements</label>
-          <Toggle
-            label="Central Sphere"
-            checked={sceneVisibility.centralSphere}
-            onChange={(checked) => onSceneVisibilityChange({ ...sceneVisibility, centralSphere: checked })}
+          <Slider
+            label="Node Count"
+            value={currentSettings.particleCount}
+            min={10}
+            max={500}
+            step={10}
+            onChange={(value) => setCurrentSettings({ ...currentSettings, particleCount: value })}
           />
-          <Toggle
-            label="Ring of Dots"
-            checked={sceneVisibility.ringOfDots}
-            onChange={(checked) => onSceneVisibilityChange({ ...sceneVisibility, ringOfDots: checked })}
+          <Slider
+            label="Node Radius"
+            value={currentSettings.particleRadius}
+            min={10}
+            max={60}
+            step={1}
+            onChange={(value) => setCurrentSettings({ ...currentSettings, particleRadius: value })}
           />
+          <Slider
+            label="Link Distance"
+            value={currentSettings.maxLineDistance}
+            min={10}
+            max={100}
+            step={5}
+            onChange={(value) => setCurrentSettings({ ...currentSettings, maxLineDistance: value })}
+          />
+        </div>
+
+        <div className="control-subsection">
           <Toggle
-            label="Particles"
+            label="Signal Particles"
             checked={sceneVisibility.particles}
-            onChange={(checked) => onSceneVisibilityChange({ ...sceneVisibility, particles: checked })}
+            onChange={(checked) => setSceneVisibility({ ...sceneVisibility, particles: checked })}
           />
           <Toggle
-            label="Connection Lines"
+            label="Layer 6 · Expression Lattice"
             checked={sceneVisibility.connectionLines}
-            onChange={(checked) => onSceneVisibilityChange({ ...sceneVisibility, connectionLines: checked })}
+            onChange={(checked) => setSceneVisibility({ ...sceneVisibility, connectionLines: checked })}
           />
         </div>
       </Section>
 
-      {/* Audio Effects */}
       <Section
-        title="Audio-Reactive Effects"
-        expanded={expandedSections.effects}
-        onToggle={() => toggleSection('effects')}
+        title="Layer 5 · Cognitive-Emotional Patterns"
+        expanded={expandedSections.layer5}
+        onToggle={() => toggleSection('layer5')}
       >
-        {/* Particle Scale Effect */}
+        <div className="control-subsection">
+          <TokenListEditor
+            label="Thinking Style"
+            tokens={cognitiveLayerTokens.thinkingStyle}
+            onChange={(tokens) => setCognitiveLayerTokens(prev => ({ ...prev, thinkingStyle: tokens }))}
+            placeholder="systematic, first_principles, ..."
+          />
+          <TokenListEditor
+            label="Communication Tone"
+            tokens={cognitiveLayerTokens.communicationTone}
+            onChange={(tokens) => setCognitiveLayerTokens(prev => ({ ...prev, communicationTone: tokens }))}
+            placeholder="professional_casual, precise, ..."
+          />
+          <TokenListEditor
+            label="Interaction Preference"
+            tokens={cognitiveLayerTokens.interactionPreference}
+            onChange={(tokens) => setCognitiveLayerTokens(prev => ({ ...prev, interactionPreference: tokens }))}
+            placeholder="socratic_dialogue, collaborative_exploration, ..."
+          />
+          <TextField
+            label="Regulation Profile"
+            value={cognitiveLayerTokens.regulationProfile}
+            onChange={(value) => setCognitiveLayerTokens(prev => ({ ...prev, regulationProfile: value }))}
+            placeholder="measured_expression"
+          />
+        </div>
+
+        <div className="control-subsection">
+          <Toggle
+            label="Layer 5 · Cognitive Pulse (Ring of Dots)"
+            checked={sceneVisibility.ringOfDots}
+            onChange={(checked) => setSceneVisibility({ ...sceneVisibility, ringOfDots: checked })}
+          />
+        </div>
+
         <EffectControl
-          title="Particle Scale"
-          description="Bass-driven particle system scaling"
+          title="Core Pulse"
+          description="Breathing amplitude of the personality nexus"
           enabled={effectSettings.particleScale.enabled}
           onToggle={(enabled) => updateEffectSetting('particleScale', 'enabled', enabled)}
         >
@@ -261,10 +263,9 @@ export function ControlPanel({
           />
         </EffectControl>
 
-        {/* Particle Rotation Effect */}
         <EffectControl
-          title="Particle Rotation"
-          description="Audio-reactive particle rotation"
+          title="Orbit Drift"
+          description="Multi-axis rotation defining narrative cadence"
           enabled={effectSettings.particleRotation.enabled}
           onToggle={(enabled) => updateEffectSetting('particleRotation', 'enabled', enabled)}
         >
@@ -284,12 +285,19 @@ export function ControlPanel({
             step={0.001}
             onChange={(value) => updateEffectSetting('particleRotation', 'zAxisIntensity', value)}
           />
+          <Slider
+            label="X-Axis"
+            value={effectSettings.particleRotation.xAxisIntensity}
+            min={0}
+            max={0.02}
+            step={0.001}
+            onChange={(value) => updateEffectSetting('particleRotation', 'xAxisIntensity', value)}
+          />
         </EffectControl>
 
-        {/* Particle Movement Effect */}
         <EffectControl
-          title="Particle Movement"
-          description="Individual particle oscillation (⚠️ performance intensive)"
+          title="Memory Flux"
+          description="Micro-oscillations to simulate recollection ripples"
           enabled={effectSettings.particleMovement.enabled}
           onToggle={(enabled) => updateEffectSetting('particleMovement', 'enabled', enabled)}
         >
@@ -311,10 +319,9 @@ export function ControlPanel({
           />
         </EffectControl>
 
-        {/* Camera Shake Effect */}
         <EffectControl
-          title="Camera Shake"
-          description="High-frequency camera shake"
+          title="Observer Drift"
+          description="Camera sway reflecting attention shifts"
           enabled={effectSettings.cameraShake.enabled}
           onToggle={(enabled) => updateEffectSetting('cameraShake', 'enabled', enabled)}
         >
@@ -334,12 +341,19 @@ export function ControlPanel({
             step={0.05}
             onChange={(value) => updateEffectSetting('cameraShake', 'threshold', value)}
           />
+          <Slider
+            label="Smoothing"
+            value={effectSettings.cameraShake.smoothing}
+            min={0.01}
+            max={0.5}
+            step={0.01}
+            onChange={(value) => updateEffectSetting('cameraShake', 'smoothing', value)}
+          />
         </EffectControl>
 
-        {/* Particle Connections Effect */}
         <EffectControl
-          title="Particle Connections"
-          description="Lines between nearby particles (⚠️ performance intensive)"
+          title="Event Lattice"
+          description="Interlinking threads for cross-memory events"
           enabled={effectSettings.particleConnections.enabled}
           onToggle={(enabled) => updateEffectSetting('particleConnections', 'enabled', enabled)}
         >
@@ -369,11 +383,142 @@ export function ControlPanel({
           />
         </EffectControl>
       </Section>
+
+      <Section
+        title="Layer 4 · Character & Self-Concept"
+        expanded={expandedSections.layer4}
+        onToggle={() => toggleSection('layer4')}
+      >
+        <div className="control-subsection">
+          <TokenListEditor
+            label="Value Priorities"
+            tokens={characterLayerTokens.valuePriorities}
+            onChange={(tokens) => setCharacterLayerTokens(prev => ({ ...prev, valuePriorities: tokens }))}
+            placeholder="autonomy>harmony, precision>speed, ..."
+          />
+          <TokenListEditor
+            label="Identity Markers"
+            tokens={characterLayerTokens.identityMarkers}
+            onChange={(tokens) => setCharacterLayerTokens(prev => ({ ...prev, identityMarkers: tokens }))}
+            placeholder="educator, systems_thinker, ..."
+          />
+          <TokenListEditor
+            label="Purpose Themes"
+            tokens={characterLayerTokens.purposeThemes}
+            onChange={(tokens) => setCharacterLayerTokens(prev => ({ ...prev, purposeThemes: tokens }))}
+            placeholder="knowledge_sharing, innovation, ..."
+          />
+          <TextField
+            label="Coherence Signature"
+            value={characterLayerTokens.coherenceSignature}
+            onChange={(value) => setCharacterLayerTokens(prev => ({ ...prev, coherenceSignature: value }))}
+            placeholder="double_chain_linkage"
+          />
+        </div>
+
+        <div className="control-subsection">
+          <Toggle
+            label="Layer 4 · Character Ring"
+            checked={sceneVisibility.parametricRing}
+            onChange={(checked) => setSceneVisibility({ ...sceneVisibility, parametricRing: checked })}
+          />
+        </div>
+
+        <div className="control-subsection">
+          <Slider
+            label="Identity Harmonics (Segments)"
+            value={parametricRingSettings.segments}
+            min={3}
+            max={32}
+            step={1}
+            onChange={(value) => updateParametricSetting('segments', value)}
+          />
+          <Slider
+            label="Self-Alignment θ"
+            value={parametricRingSettings.pivotAngle}
+            min={10}
+            max={170}
+            step={1}
+            onChange={(value) => updateParametricSetting('pivotAngle', value)}
+          />
+          <Slider
+            label="Value Arc Length"
+            value={parametricRingSettings.rodLength}
+            min={2}
+            max={20}
+            step={0.5}
+            onChange={(value) => updateParametricSetting('rodLength', value)}
+          />
+          <Slider
+            label="Purpose Kink γ"
+            value={parametricRingSettings.kinkAngle}
+            min={60}
+            max={150}
+            step={1}
+            onChange={(value) => updateParametricSetting('kinkAngle', value)}
+          />
+          <Slider
+            label="Identity Radius"
+            value={parametricRingSettings.innerRadius}
+            min={2}
+            max={20}
+            step={0.5}
+            onChange={(value) => updateParametricSetting('innerRadius', value)}
+          />
+          <Slider
+            label="Perspective Tilt (X°)"
+            value={(parametricRingSettings.rotation[0] * 180) / Math.PI}
+            min={-90}
+            max={90}
+            step={1}
+            onChange={(value) =>
+              updateParametricSetting('rotation', [
+                (value * Math.PI) / 180,
+                parametricRingSettings.rotation[1],
+                parametricRingSettings.rotation[2]
+              ] as ParametricRingSettings['rotation'])
+            }
+          />
+        </div>
+      </Section>
+
+      <Section
+        title="Layer 2 · Trait Indicators"
+        expanded={expandedSections.layer2}
+        onToggle={() => toggleSection('layer2')}
+      >
+        <div className="control-subsection">
+          <TokenListEditor
+            label="Trait Markers"
+            tokens={traitLayerTokens.traitMarkers}
+            onChange={(tokens) => setTraitLayerTokens(prev => ({ ...prev, traitMarkers: tokens }))}
+            placeholder="high_openness, moderate_conscientiousness, ..."
+          />
+          <TextField
+            label="Curiosity Bias"
+            value={traitLayerTokens.curiosityBias}
+            onChange={(value) => setTraitLayerTokens(prev => ({ ...prev, curiosityBias: value }))}
+            placeholder="exploratory_synthesis"
+          />
+          <TextField
+            label="Structure Bias"
+            value={traitLayerTokens.structureBias}
+            onChange={(value) => setTraitLayerTokens(prev => ({ ...prev, structureBias: value }))}
+            placeholder="precise_but_flexible"
+          />
+        </div>
+
+        <div className="control-subsection">
+          <Toggle
+            label="Layer 2 · Central Sphere"
+            checked={sceneVisibility.traitIndicators}
+            onChange={(checked) => setSceneVisibility({ ...sceneVisibility, traitIndicators: checked })}
+          />
+        </div>
+      </Section>
     </div>
   );
 }
-
-// Helper Components
 
 function Section({
   title,
@@ -485,28 +630,60 @@ function Slider({
   );
 }
 
-function LevelMeter({
+function TokenListEditor({
   label,
-  level,
-  color
+  tokens,
+  onChange,
+  placeholder
 }: {
   label: string;
-  level: number;
-  color: string;
+  tokens: string[];
+  onChange: (tokens: string[]) => void;
+  placeholder?: string;
+}) {
+  const value = tokens.join(', ');
+
+  const handleChange = (input: string) => {
+    const nextTokens = input
+      .split(',')
+      .map(token => token.trim())
+      .filter(Boolean);
+    onChange(nextTokens);
+  };
+
+  return (
+    <div className="token-editor">
+      <label>{label}</label>
+      <textarea
+        value={value}
+        placeholder={placeholder}
+        onChange={(event) => handleChange(event.target.value)}
+      />
+      <small>Comma-separated list; entries become context tokens.</small>
+    </div>
+  );
+}
+
+function TextField({
+  label,
+  value,
+  onChange,
+  placeholder
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
 }) {
   return (
-    <div className="level-meter">
-      <span className="level-label">{label}</span>
-      <div className="level-bar">
-        <div
-          className="level-fill"
-          style={{
-            width: `${level * 100}%`,
-            background: color
-          }}
-        />
-      </div>
-      <span className="level-value">{Math.round(level * 100)}%</span>
+    <div className="text-editor">
+      <label>{label}</label>
+      <input
+        type="text"
+        value={value}
+        placeholder={placeholder}
+        onChange={(event) => onChange(event.target.value)}
+      />
     </div>
   );
 }

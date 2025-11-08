@@ -1,6 +1,5 @@
 import { useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import { CentralSphere } from './CentralSphere';
 import { RingOfDots } from './RingOfDots';
@@ -8,7 +7,9 @@ import { ParticleSystem } from './ParticleSystem';
 import { ConnectionLines } from './ConnectionLines';
 import { PostProcessingEffects } from './PostProcessingEffects';
 import EffectsManager, { type EffectSettings } from '../effects/EffectsManager';
-import type { AudioData } from '../../types/audio';
+import { TraitIndicator3D } from './TraitIndicator3D';
+import { ParametricRing, type ParametricRingSettings } from './ParametricRing';
+import type { PersonalityLayerType } from '../../config/parametricRing';
 
 export interface SceneSettings {
   maxLineDistance: number;
@@ -21,26 +22,64 @@ export interface SceneSettings {
 export interface SceneElementsVisibility {
   centralSphere: boolean;
   ringOfDots: boolean;
+  traitIndicators: boolean;
   particles: boolean;
   connectionLines: boolean;
+  parametricRing: boolean;
+}
+
+interface ParametricRingPersonalityProps {
+  layerType?: PersonalityLayerType;
+  traitStability?: number;
+  traitConsistency?: number;
+  expressiveness?: number;
+  adaptability?: number;
+}
+
+interface ParametricRingAudioProps {
+  bassLevel?: number;
+  midLevel?: number;
+  trebleLevel?: number;
+  beatDetected?: boolean;
 }
 
 interface Scene3DProps {
-  audioData: AudioData;
   settings: SceneSettings;
   sceneVisibility?: SceneElementsVisibility;
   effectSettings: EffectSettings;
   onEffectSettingsChange?: (settings: EffectSettings) => void;
   onSettingsChange?: (settings: SceneSettings) => void;
+  parametricRingSettings?: ParametricRingSettings;
+  parametricRingPersonality?: ParametricRingPersonalityProps;
+  parametricRingAudio?: ParametricRingAudioProps;
 }
 
 export function Scene3D({
-  audioData,
   settings,
-  sceneVisibility = { centralSphere: true, ringOfDots: true, particles: true, connectionLines: true },
-  effectSettings
+  sceneVisibility = { centralSphere: true, ringOfDots: true, traitIndicators: true, particles: true, connectionLines: true, parametricRing: false },
+  effectSettings,
+  parametricRingSettings,
+  parametricRingPersonality,
+  parametricRingAudio
 }: Scene3DProps) {
   const particleSystemRef = useRef<THREE.Points>(null);
+
+  const ringPersonality: ParametricRingPersonalityProps = {
+    layerType: 'character_self_concept',
+    traitStability: 0.9,
+    traitConsistency: 0.85,
+    expressiveness: 0.7,
+    adaptability: 0.8,
+    ...parametricRingPersonality
+  };
+
+  const ringAudio: ParametricRingAudioProps = {
+    bassLevel: 0,
+    midLevel: 0.15,
+    trebleLevel: 0.1,
+    beatDetected: false,
+    ...parametricRingAudio
+  };
 
   return (
     <>
@@ -63,23 +102,14 @@ export function Scene3D({
           left: 0,
           width: '100%',
           height: '100%',
-          background: '#000000'
+          background: '#f7f3e8'
         }}
       >
-        {/* Scene setup */}
-        <color attach="background" args={['#000000']} />
+        <color attach="background" args={['#f7f3e8']} />
         <ambientLight intensity={0.25} />
 
-        {/* Orbit controls */}
-        <OrbitControls
-          enableDamping
-          dampingFactor={0.05}
-          target={[0, 0, 0]}
-        />
-
-        {/* Main scene objects */}
-        {sceneVisibility.centralSphere && <CentralSphere audioData={audioData} />}
-        {sceneVisibility.ringOfDots && <RingOfDots audioData={audioData} />}
+        {sceneVisibility.centralSphere && <CentralSphere />}
+        {sceneVisibility.ringOfDots && <RingOfDots />}
         {sceneVisibility.particles && (
           <ParticleSystem
             ref={particleSystemRef}
@@ -89,19 +119,27 @@ export function Scene3D({
         )}
         {sceneVisibility.connectionLines && (
           <ConnectionLines
-            particleSystemRef={particleSystemRef}
+            particleCount={settings.particleCount}
+            radius={settings.particleRadius}
             maxLineDistance={settings.maxLineDistance}
           />
         )}
 
-        {/* Audio-reactive effects */}
+        {sceneVisibility.traitIndicators && <TraitIndicator3D />}
+
+        {sceneVisibility.parametricRing && parametricRingSettings && (
+          <ParametricRing
+            {...parametricRingSettings}
+            {...ringPersonality}
+            {...ringAudio}
+          />
+        )}
+
         <EffectsManager
           particleSystemRef={particleSystemRef}
-          audioData={audioData}
           settings={effectSettings}
         />
 
-        {/* Post-processing effects */}
         <PostProcessingEffects />
       </Canvas>
     </>

@@ -5,7 +5,7 @@
  * It includes mocks for Web Audio API, MediaDevices, and other browser APIs.
  */
 
-import { expect, afterEach, vi } from 'vitest';
+import { afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 
@@ -104,8 +104,10 @@ class MockAnalyserNode {
 }
 
 // Mock AudioContext constructor
-global.AudioContext = MockAudioContext as any;
-(global as any).webkitAudioContext = MockAudioContext;
+// @ts-ignore
+global.AudioContext = MockAudioContext;
+// @ts-ignore
+global.webkitAudioContext = MockAudioContext;
 
 // Mock MediaStream
 class MockMediaStreamTrack {
@@ -152,7 +154,8 @@ class MockMediaStream {
   dispatchEvent = vi.fn();
 }
 
-global.MediaStream = MockMediaStream as any;
+// @ts-ignore
+global.MediaStream = MockMediaStream;
 
 // Mock MediaDevices
 const mockGetUserMedia = vi.fn(() => Promise.resolve(new MockMediaStream()));
@@ -176,6 +179,7 @@ const mockEnumerateDevices = vi.fn(() =>
   ])
 );
 
+// @ts-ignore
 Object.defineProperty(global.navigator, 'mediaDevices', {
   writable: true,
   value: {
@@ -189,13 +193,14 @@ Object.defineProperty(global.navigator, 'mediaDevices', {
 });
 
 // Mock requestAnimationFrame / cancelAnimationFrame
-global.requestAnimationFrame = vi.fn((callback) => {
+// @ts-ignore
+global.requestAnimationFrame = (callback: FrameRequestCallback) => {
   return setTimeout(callback, 16) as unknown as number;
-});
-
-global.cancelAnimationFrame = vi.fn((id) => {
+};
+// @ts-ignore
+global.cancelAnimationFrame = (id: number) => {
   clearTimeout(id);
-});
+};
 
 // Mock HTMLMediaElement
 Object.defineProperty(HTMLMediaElement.prototype, 'play', {
@@ -214,8 +219,10 @@ Object.defineProperty(HTMLMediaElement.prototype, 'load', {
 });
 
 // Mock URL.createObjectURL and URL.revokeObjectURL
-global.URL.createObjectURL = vi.fn(() => 'blob:mock-url');
-global.URL.revokeObjectURL = vi.fn();
+// @ts-ignore
+global.URL.createObjectURL = () => 'blob:mock-url';
+// @ts-ignore
+global.URL.revokeObjectURL = () => {};
 
 // Export mock instances for use in tests
 export const mockAudioContext = new MockAudioContext();

@@ -1,54 +1,67 @@
 import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import type { AudioData } from '../../types/audio';
 
-interface RingOfDotsProps {
-  audioData: AudioData;
+const STATIC_ROTATION_X = -Math.PI / 2;
+
+export interface RingOfDotsProps {
+  ringRadius?: number;
+  dotCount?: number;
+  dotSize?: number;
+  color?: THREE.ColorRepresentation;
+  opacity?: number;
+  pulseEnabled?: boolean;
+  pulseIntensity?: number;
 }
 
-export function RingOfDots({ audioData }: RingOfDotsProps) {
+export function RingOfDots({
+  ringRadius = 18,
+  dotCount = 18,
+  dotSize = 2.6,
+  color = 0xD9C6A3,
+  opacity = 0.9,
+  pulseEnabled = true,
+  pulseIntensity = 0.02
+}: RingOfDotsProps) {
   const pointsRef = useRef<THREE.Points>(null);
 
   const ringGeometry = useMemo(() => {
-    const ringRadius = 8; // Slightly larger than the central sphere (radius 5)
-    const dotCount = 60; // Number of dots in the ring
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(dotCount * 3);
 
-    // Create dots in a circular formation
     for (let i = 0; i < dotCount; i++) {
       const angle = (i / dotCount) * Math.PI * 2;
-      positions[i * 3] = Math.cos(angle) * ringRadius;     // x
-      positions[i * 3 + 1] = 0;                            // y (keep on horizontal plane)
-      positions[i * 3 + 2] = Math.sin(angle) * ringRadius; // z
+      positions[i * 3] = Math.cos(angle) * ringRadius;
+      positions[i * 3 + 1] = 0;
+      positions[i * 3 + 2] = Math.sin(angle) * ringRadius;
     }
 
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.rotateX(STATIC_ROTATION_X);
     return geometry;
-  }, []);
+  }, [ringRadius, dotCount]);
 
-  // Ring reacts to bass with rotation speed and mid frequencies with scale
-  useFrame(() => {
+  useFrame(({ clock }) => {
     if (!pointsRef.current) return;
 
-    const ringScale = 1 + (audioData.midLevel * 0.15);
-    pointsRef.current.scale.setScalar(ringScale);
+    const elapsed = clock.getElapsedTime();
 
-    // Increase rotation speed based on bass
-    const baseRotation = 0.005;
-    const audioRotation = audioData.bassLevel * 0.02;
-    pointsRef.current.rotation.y += baseRotation + audioRotation;
+    if (pulseEnabled) {
+      const scalePulse = 1 + Math.sin(elapsed * 0.9) * pulseIntensity + Math.sin(elapsed * 0.07) * (pulseIntensity * 0.25);
+      pointsRef.current.scale.setScalar(scalePulse);
+    }
+
+    pointsRef.current.rotation.z = STATIC_ROTATION_X + elapsed * 0.25;
   });
 
   return (
     <points ref={pointsRef} geometry={ringGeometry}>
       <pointsMaterial
-        color={0x00D9FF} // Cyan accent color
-        size={0.3}
-        transparent={true}
-        opacity={0.9}
-        sizeAttenuation={true}
+        color={color}
+        size={dotSize}
+        transparent
+        opacity={opacity}
+        sizeAttenuation
       />
     </points>
   );

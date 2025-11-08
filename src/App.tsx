@@ -1,4 +1,4 @@
-import AudioVisualizerDemo from './components/AudioVisualizerDemo';
+import PantheonDemo from './components/PantheonDemo';
 import ErrorBoundary from './components/ErrorBoundary';
 import './App.css';
 
@@ -6,7 +6,7 @@ function App() {
   return (
     <ErrorBoundary>
       <div className="App">
-        <AudioVisualizerDemo />
+        <PantheonDemo />
       </div>
     </ErrorBoundary>
   );
