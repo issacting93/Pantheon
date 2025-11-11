@@ -1,8 +1,17 @@
-# AI Personality Layers: A Visual Mapping
+# AI Personality Layers: Project Overview
 
-## Conceptual Framework
+## What Is Pantheon?
 
-This document maps the audio visualizer's particle systems and components to layers of AI personality and cognition. Each visual system represents a different aspect of how an AI personality might be structured, from core identity to surface-level behavioral expression.
+Pantheon is an immersive React + Three.js experience that lets you *see* the moving parts of an AI personality. The demo arranges animated geometry, particle systems, and audio-reactive shaders into a single “constellation” that mirrors how an AI reasoner stores values, modulates tone, and expresses itself. Instead of reading a long spec, teammates and collaborators can orbit the scene, tweak controls, and immediately feel how the model’s internal layers interact.
+
+**Core ideas**
+- Personality isn’t a single slider—it’s layered. Stable identity anchors the inner geometry, cognitive-emotional patterns pulse in the middle, and expression/engagement radiate outward.
+- Audio input and UI knobs give live feedback. As you change parameters or stream sound, the visualization rebalances to show where energy is flowing.
+- The mapping is bidirectional: every on-screen motif corresponds to context tokens the runtime can feed into an AI prompt, and every token group has a visual home.
+
+## How the Visualizer Fits the Project
+
+Pantheon began as a hackathon artifact to explain “modular AI consciousness” to both designers and engineers. This file documents the shared vocabulary between the on-screen components (`src/components/r3f` and `src/components/effects`) and the conceptual layers we use in prompts, specs, and personality blueprints. Treat it as the canonical bridge between *code*, *behavioral design*, and *storytelling* about the system.
 
 ---
 

@@ -13,16 +13,16 @@ import type {
 
 interface ControlPanelProps {
   currentSettings: SceneSettings;
-  setCurrentSettings: (settings: SceneSettings) => void;
+  setCurrentSettings: Dispatch<SetStateAction<SceneSettings>>;
   sceneVisibility: SceneElementsVisibility;
-  setSceneVisibility: (visibility: SceneElementsVisibility) => void;
+  setSceneVisibility: Dispatch<SetStateAction<SceneElementsVisibility>>;
   effectSettings: EffectSettings;
-  setEffectSettings: (settings: EffectSettings) => void;
+  setEffectSettings: Dispatch<SetStateAction<EffectSettings>>;
   cameraState: number;
   setCameraState: (state: number) => void;
   resetToDefaults: () => void;
   parametricRingSettings: ParametricRingSettings;
-  setParametricRingSettings: (settings: ParametricRingSettings) => void;
+  setParametricRingSettings: Dispatch<SetStateAction<ParametricRingSettings>>;
   characterLayerTokens: CharacterLayerTokens;
   setCharacterLayerTokens: Dispatch<SetStateAction<CharacterLayerTokens>>;
   cognitiveLayerTokens: CognitiveLayerTokens;
@@ -70,21 +70,29 @@ export function ControlPanel({
     key: K,
     value: ParametricRingSettings[K]
   ) {
-    setParametricRingSettings({
-      ...parametricRingSettings,
+    setParametricRingSettings(prev => ({
+      ...prev,
       [key]: value
-    });
+    }));
   }
 
-  const updateEffectSetting = (category: keyof EffectSettings, key: string, value: any) => {
-    setEffectSettings({
-      ...effectSettings,
-      [category]: {
-        ...effectSettings[category],
+  function updateEffectSetting<Category extends keyof EffectSettings, Key extends keyof EffectSettings[Category]>(
+    category: Category,
+    key: Key,
+    value: EffectSettings[Category][Key]
+  ) {
+    setEffectSettings(prev => {
+      const categorySettings = {
+        ...prev[category],
         [key]: value
-      }
+      } as EffectSettings[Category];
+
+      return {
+        ...prev,
+        [category]: categorySettings
+      };
     });
-  };
+  }
 
   return (
     <div className="control-panel">
@@ -165,7 +173,7 @@ export function ControlPanel({
             min={10}
             max={500}
             step={10}
-            onChange={(value) => setCurrentSettings({ ...currentSettings, particleCount: value })}
+            onChange={(value) => setCurrentSettings(prev => ({ ...prev, particleCount: value }))}
           />
           <Slider
             label="Node Radius"
@@ -173,7 +181,7 @@ export function ControlPanel({
             min={10}
             max={60}
             step={1}
-            onChange={(value) => setCurrentSettings({ ...currentSettings, particleRadius: value })}
+            onChange={(value) => setCurrentSettings(prev => ({ ...prev, particleRadius: value }))}
           />
           <Slider
             label="Link Distance"
@@ -181,7 +189,7 @@ export function ControlPanel({
             min={10}
             max={100}
             step={5}
-            onChange={(value) => setCurrentSettings({ ...currentSettings, maxLineDistance: value })}
+            onChange={(value) => setCurrentSettings(prev => ({ ...prev, maxLineDistance: value }))}
           />
         </div>
 
@@ -189,12 +197,12 @@ export function ControlPanel({
           <Toggle
             label="Signal Particles"
             checked={sceneVisibility.particles}
-            onChange={(checked) => setSceneVisibility({ ...sceneVisibility, particles: checked })}
+            onChange={(checked) => setSceneVisibility(prev => ({ ...prev, particles: checked }))}
           />
           <Toggle
             label="Layer 6 · Expression Lattice"
             checked={sceneVisibility.connectionLines}
-            onChange={(checked) => setSceneVisibility({ ...sceneVisibility, connectionLines: checked })}
+            onChange={(checked) => setSceneVisibility(prev => ({ ...prev, connectionLines: checked }))}
           />
         </div>
       </Section>
@@ -235,7 +243,7 @@ export function ControlPanel({
           <Toggle
             label="Layer 5 · Cognitive Pulse (Ring of Dots)"
             checked={sceneVisibility.ringOfDots}
-            onChange={(checked) => setSceneVisibility({ ...sceneVisibility, ringOfDots: checked })}
+            onChange={(checked) => setSceneVisibility(prev => ({ ...prev, ringOfDots: checked }))}
           />
         </div>
 
@@ -420,7 +428,7 @@ export function ControlPanel({
           <Toggle
             label="Layer 4 · Character Ring"
             checked={sceneVisibility.parametricRing}
-            onChange={(checked) => setSceneVisibility({ ...sceneVisibility, parametricRing: checked })}
+            onChange={(checked) => setSceneVisibility(prev => ({ ...prev, parametricRing: checked }))}
           />
         </div>
 
@@ -512,7 +520,7 @@ export function ControlPanel({
           <Toggle
             label="Layer 2 · Central Sphere"
             checked={sceneVisibility.traitIndicators}
-            onChange={(checked) => setSceneVisibility({ ...sceneVisibility, traitIndicators: checked })}
+            onChange={(checked) => setSceneVisibility(prev => ({ ...prev, traitIndicators: checked }))}
           />
         </div>
       </Section>

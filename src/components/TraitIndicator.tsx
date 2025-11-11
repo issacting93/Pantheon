@@ -11,3 +11,4 @@ export function TraitIndicator({ className }: TraitIndicatorProps) {
     </div>
   );
 }
+

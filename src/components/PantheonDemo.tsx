@@ -5,7 +5,7 @@ import type { EffectSettings } from './effects/EffectsManager';
 import { defaultEffectSettings } from './effects/EffectsManager';
 import type { ParametricRingSettings } from './r3f/ParametricRing';
 import './PantheonDemo.css';
-import {
+import type {
   CharacterLayerTokens,
   CognitiveLayerTokens,
   ExpressionLayerTokens,

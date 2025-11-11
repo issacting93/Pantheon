@@ -15,3 +15,4 @@ export function TraitIndicator3D({ position = [-35, 15, 0], scale = 0.85 }: Trai
     </group>
   );
 }
+

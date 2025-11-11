@@ -93,9 +93,9 @@ export function perlin3(x: number, y: number, z: number): number {
     return a + b;
   };
 
-  let X = Math.floor(x) & 255;
-  let Y = Math.floor(y) & 255;
-  let Z = Math.floor(z) & 255;
+  const X = Math.floor(x) & 255;
+  const Y = Math.floor(y) & 255;
+  const Z = Math.floor(z) & 255;
 
   x -= Math.floor(x);
   y -= Math.floor(y);

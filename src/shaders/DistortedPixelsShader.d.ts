@@ -1,6 +1,8 @@
+import type { Texture } from 'three';
+
 export const DistortedPixelsShader: {
   uniforms: {
-    tDiffuse: { value: any };
+    tDiffuse: { value: Texture | null };
     time: { value: number };
     amplitude: { value: number };
     frequency: { value: number };

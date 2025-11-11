@@ -342,11 +342,16 @@ export function withErrorBoundary<P extends object>(
   Component: React.ComponentType<P>,
   fallback?: (error: Error, reset: () => void) => ReactNode
 ): React.ComponentType<P> {
-  return (props: P) => (
+  const WrappedComponent = (props: P) => (
     <ErrorBoundary fallback={fallback}>
       <Component {...props} />
     </ErrorBoundary>
   );
+
+  const componentName = Component.displayName ?? Component.name ?? 'Component';
+  WrappedComponent.displayName = `WithErrorBoundary(${componentName})`;
+
+  return WrappedComponent;
 }
 
 export default ErrorBoundary;

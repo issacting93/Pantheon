@@ -26,15 +26,21 @@ export default function EffectsControlPanel({
     }));
   };
 
-  const updateSetting = (category: keyof EffectSettings, key: string, value: any) => {
+  function updateSetting<Category extends keyof EffectSettings, Key extends keyof EffectSettings[Category]>(
+    category: Category,
+    key: Key,
+    value: EffectSettings[Category][Key]
+  ) {
+    const updatedCategory = {
+      ...settings[category],
+      [key]: value
+    } as EffectSettings[Category];
+
     onSettingsChange({
       ...settings,
-      [category]: {
-        ...settings[category],
-        [key]: value
-      }
+      [category]: updatedCategory
     });
-  };
+  }
 
   const resetToDefaults = () => {
     onSettingsChange(defaultEffectSettings);

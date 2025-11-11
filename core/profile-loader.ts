@@ -52,23 +52,35 @@ export async function loadSyntheticProfile(): Promise<PersonalityProfile> {
 /**
  * Basic validation of profile structure
  */
-export function validateProfileStructure(data: any): data is PersonalityProfile {
-  // Check required root fields
-  if (!data.profile_id || typeof data.profile_id !== 'string') return false;
-  if (!data.version || typeof data.version !== 'string') return false;
-  if (!data.created_at || typeof data.created_at !== 'string') return false;
-  if (!data.updated_at || typeof data.updated_at !== 'string') return false;
-  if (typeof data.session_count !== 'number') return false;
-  if (!['empty', 'seeded', 'learning', 'complete'].includes(data.initialization_state)) return false;
-  if (typeof data.overall_confidence !== 'number') return false;
-  
-  // Check layers exist
-  if (!data.trait_indicators) return false;
-  if (!data.identity_values) return false;
-  if (!data.cognitive_patterns) return false;
-  if (!data.emotional_patterns) return false;
-  if (!data.expression_patterns) return false;
-  if (!data.domain_context) return false;
-  
-  return true;
+export function validateProfileStructure(data: unknown): data is PersonalityProfile {
+  if (typeof data !== 'object' || data === null) {
+    return false;
+  }
+
+  const candidate = data as Record<string, unknown>;
+
+  if (typeof candidate.profile_id !== 'string') return false;
+  if (typeof candidate.version !== 'string') return false;
+  if (typeof candidate.created_at !== 'string') return false;
+  if (typeof candidate.updated_at !== 'string') return false;
+  if (typeof candidate.session_count !== 'number') return false;
+
+  const initializationState = candidate.initialization_state;
+  const validInitializationStates = new Set(['empty', 'seeded', 'learning', 'complete']);
+  if (typeof initializationState !== 'string' || !validInitializationStates.has(initializationState)) {
+    return false;
+  }
+
+  if (typeof candidate.overall_confidence !== 'number') return false;
+
+  const nestedKeys: Array<keyof PersonalityProfile> = [
+    'trait_indicators',
+    'identity_values',
+    'cognitive_patterns',
+    'emotional_patterns',
+    'expression_patterns',
+    'domain_context'
+  ];
+
+  return nestedKeys.every((key) => key in candidate && typeof candidate[key] === 'object' && candidate[key] !== null);
 }

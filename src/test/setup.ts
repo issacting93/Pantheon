@@ -104,9 +104,9 @@ class MockAnalyserNode {
 }
 
 // Mock AudioContext constructor
-// @ts-ignore
+// @ts-expect-error -- jsdom environment lacks Web Audio implementation
 global.AudioContext = MockAudioContext;
-// @ts-ignore
+// @ts-expect-error -- jsdom environment provides only a subset of APIs
 global.webkitAudioContext = MockAudioContext;
 
 // Mock MediaStream
@@ -154,7 +154,7 @@ class MockMediaStream {
   dispatchEvent = vi.fn();
 }
 
-// @ts-ignore
+// @ts-expect-error -- jsdom environment lacks MediaStream implementation
 global.MediaStream = MockMediaStream;
 
 // Mock MediaDevices
@@ -179,7 +179,7 @@ const mockEnumerateDevices = vi.fn(() =>
   ])
 );
 
-// @ts-ignore
+// @ts-expect-error -- redefining mediaDevices for controlled test doubles
 Object.defineProperty(global.navigator, 'mediaDevices', {
   writable: true,
   value: {
@@ -193,11 +193,11 @@ Object.defineProperty(global.navigator, 'mediaDevices', {
 });
 
 // Mock requestAnimationFrame / cancelAnimationFrame
-// @ts-ignore
+// @ts-expect-error -- jsdom environment lacks requestAnimationFrame
 global.requestAnimationFrame = (callback: FrameRequestCallback) => {
   return setTimeout(callback, 16) as unknown as number;
 };
-// @ts-ignore
+// @ts-expect-error -- jsdom environment lacks cancelAnimationFrame
 global.cancelAnimationFrame = (id: number) => {
   clearTimeout(id);
 };
@@ -219,9 +219,9 @@ Object.defineProperty(HTMLMediaElement.prototype, 'load', {
 });
 
 // Mock URL.createObjectURL and URL.revokeObjectURL
-// @ts-ignore
+// @ts-expect-error -- jsdom environment lacks URL.createObjectURL
 global.URL.createObjectURL = () => 'blob:mock-url';
-// @ts-ignore
+// @ts-expect-error -- jsdom environment lacks URL.revokeObjectURL
 global.URL.revokeObjectURL = () => {};
 
 // Export mock instances for use in tests

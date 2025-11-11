@@ -47,8 +47,6 @@ interface Scene3DProps {
   settings: SceneSettings;
   sceneVisibility?: SceneElementsVisibility;
   effectSettings: EffectSettings;
-  onEffectSettingsChange?: (settings: EffectSettings) => void;
-  onSettingsChange?: (settings: SceneSettings) => void;
   parametricRingSettings?: ParametricRingSettings;
   parametricRingPersonality?: ParametricRingPersonalityProps;
   parametricRingAudio?: ParametricRingAudioProps;
